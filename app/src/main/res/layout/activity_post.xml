@@ -6,17 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".PostActivity">
 
-    <ImageView
-        android:id="@+id/imageView"
+    <ImageButton
+        android:id="@+id/imageSelect"
         android:layout_width="match_parent"
         android:layout_height="218dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_margin="8dp"
-        app:srcCompat="@drawable/add_image_placeholder" />
+        android:src="@drawable/add_image_placeholder" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/titleFeild"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -27,7 +27,7 @@
         android:inputType="textPersonName" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/despFeild"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -38,7 +38,7 @@
         android:inputType="textPersonName" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/submitButton"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
