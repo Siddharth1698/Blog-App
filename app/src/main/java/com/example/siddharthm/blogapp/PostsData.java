@@ -3,12 +3,10 @@ package com.example.siddharthm.blogapp;
 public class PostsData {
     String title;
     String descp;
-    int photoid;
+    String image;
 
-    public PostsData(String title, String descp, int photoid) {
-        this.title = title;
-        this.descp = descp;
-        this.photoid = photoid;
+    public PostsData() {
+
     }
 
     public String getTitle() {
@@ -27,11 +25,11 @@ public class PostsData {
         this.descp = descp;
     }
 
-    public int getPhotoid() {
-        return photoid;
+    public String getImage() {
+        return image;
     }
 
-    public void setPhotoid(int photoid) {
-        this.photoid = photoid;
+    public void setImage(String photoid) {
+        this.image = photoid;
     }
 }

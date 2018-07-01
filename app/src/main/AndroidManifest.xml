@@ -20,7 +20,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".PostActivity" />
-        <activity android:name=".post_cards"></activity>
     </application>
 
 </manifest>

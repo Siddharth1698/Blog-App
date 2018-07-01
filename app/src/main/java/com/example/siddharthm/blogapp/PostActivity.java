@@ -3,6 +3,7 @@ package com.example.siddharthm.blogapp;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,7 +13,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -66,18 +70,33 @@ public class PostActivity extends AppCompatActivity {
         final String title_val = mPostTitle.getText().toString().trim();
         final String desc_val = mPostDescp.getText().toString().trim();
         if (!TextUtils.isEmpty(title_val) && !TextUtils.isEmpty(desc_val) && imageUri != null){
-            StorageReference filepath = mStorage.child("Blog Images").child(imageUri.getLastPathSegment());
-            filepath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            final StorageReference filepath = mStorage.child("Blog Images").child(imageUri.getLastPathSegment());
+
+            filepath.putFile(imageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Uri downloadUrl = taskSnapshot.getUploadSessionUri();
-                    DatabaseReference newPost = mDatabase.push();
-                    newPost.child("title").setValue(title_val);
-                    newPost.child("descp").setValue(desc_val);
-                    newPost.child("image").setValue(downloadUrl.toString());
-                    mpd.dismiss();
-                    Toast.makeText(getApplicationContext(),"Succesfully Posted to blog",Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(PostActivity.this,MainActivity.class));
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+
+                    }
+                    return filepath.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        DatabaseReference newPost = mDatabase.push();
+                        newPost.child("title").setValue(title_val);
+                        newPost.child("descp").setValue(desc_val);
+                        newPost.child("image").setValue(downloadUri.toString());
+
+                        mpd.dismiss();
+                        Toast.makeText(getApplicationContext(),"Succesfully Posted to blog",Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(PostActivity.this,MainActivity.class));
+                    } else {
+
+                    }
                 }
             });
 
