@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,12 +31,25 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mBlogList;
     private DatabaseReference mDatabaseReference;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListner;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListner = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                  if (firebaseAuth.getCurrentUser() == null){
+                      Intent login_Intent = new Intent(MainActivity.this,RegisterActivity.class);
+                      login_Intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                      startActivity(login_Intent);
+                  }
+            }
+        };
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Blog");
         mBlogList = (RecyclerView)findViewById(R.id.blogList);
         mBlogList.setHasFixedSize(true);
@@ -47,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListner);
         FirebaseRecyclerAdapter<PostsData,PostViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<PostsData, PostViewHolder>
                 (PostsData.class,R.layout.activity_post_cards,PostViewHolder.class,mDatabaseReference) {
             @Override
@@ -96,7 +111,14 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_add){
             startActivity(new Intent(MainActivity.this,PostActivity.class));
         }
+        if (item.getItemId() == R.id.action_logout){
+            logout();
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void logout() {
+        mAuth.signOut();
     }
 
 
