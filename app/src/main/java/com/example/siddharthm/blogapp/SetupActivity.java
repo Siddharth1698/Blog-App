@@ -26,7 +26,7 @@ public class SetupActivity extends AppCompatActivity {
         setupImageBtn = (ImageButton)findViewById(R.id.setupImageButton);
         setupSubmitBtn = (Button)findViewById(R.id.setUpSubmitButton);
 
-        setupSubmitBtn.setOnClickListener(new View.OnClickListener() {
+        setupImageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent galleryIntent = new Intent();
@@ -44,10 +44,21 @@ public class SetupActivity extends AppCompatActivity {
 
         if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK){
             Uri imageUri = data.getData();
-            CropImage.activity()
+            CropImage.activity(imageUri)
                     .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1,1)
                     .start(this);
 
+        }
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri resultUri = result.getUri();
+                setupImageBtn.setImageURI(resultUri);
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
         }
     }
 }
