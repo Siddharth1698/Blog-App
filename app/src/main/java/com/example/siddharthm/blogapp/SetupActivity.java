@@ -1,5 +1,6 @@
 package com.example.siddharthm.blogapp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -35,6 +36,7 @@ public class SetupActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseUsers;
     private FirebaseAuth mAuth;
     private StorageReference mStorageImage;
+    private ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,7 @@ public class SetupActivity extends AppCompatActivity {
         setupName = (EditText)findViewById(R.id.setupImageFeild);
         setupImageBtn = (ImageButton)findViewById(R.id.setupImageButton);
         setupSubmitBtn = (Button)findViewById(R.id.setUpSubmitButton);
+        pd = new ProgressDialog(this);
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
         mStorageImage = FirebaseStorage.getInstance().getReference().child("ProfileImages");
         mAuth = FirebaseAuth.getInstance();
@@ -70,6 +73,8 @@ public class SetupActivity extends AppCompatActivity {
         final String name = setupName.getText().toString().trim();
         final String user_id = mAuth.getCurrentUser().getUid();
         if (!TextUtils.isEmpty(name) && resultUri != null){
+            pd.setMessage("Finishing Setup...");
+            pd.show();
             final StorageReference filepath = mStorageImage.child(resultUri.getLastPathSegment());
             filepath.putFile(resultUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
@@ -88,6 +93,11 @@ public class SetupActivity extends AppCompatActivity {
                         String durl = gettdownloadUri.toString();
                         mDatabaseUsers.child(user_id).child("name").setValue(name);
                         mDatabaseUsers.child(user_id).child("image").setValue(durl);
+                        pd.dismiss();
+
+                        Intent mainIntent = new Intent(SetupActivity.this,MainActivity.class);
+                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(mainIntent);
 
                     } else {
 

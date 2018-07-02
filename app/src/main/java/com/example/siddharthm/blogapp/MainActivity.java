@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         mBlogList = (RecyclerView)findViewById(R.id.blogList);
         mBlogList.setHasFixedSize(true);
         mBlogList.setLayoutManager(new LinearLayoutManager(this));
+        checkUserExist();
 
 
         }
@@ -66,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        checkUserExist();
         mAuth.addAuthStateListener(mAuthListner);
         FirebaseRecyclerAdapter<PostsData,PostViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<PostsData, PostViewHolder>
                 (PostsData.class,R.layout.activity_post_cards,PostViewHolder.class,mDatabaseReference) {
@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkUserExist() {
+        if (mAuth.getCurrentUser()!=null){
         final String user_id = mAuth.getCurrentUser().getUid();
         mDatabaseUsers.addValueEventListener(new ValueEventListener() {
             @Override
@@ -100,8 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-    }
-
+    }}
     public static class PostViewHolder extends RecyclerView.ViewHolder{
         View mView;
 
