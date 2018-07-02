@@ -1,5 +1,7 @@
 package com.example.siddharthm.blogapp;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,8 +25,10 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mLoginEmail;
     private EditText mLoginPassword;
     private Button mLoginBtn;
+    private Button createBtn;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private ProgressDialog mProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +36,21 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
+        mProgress = new ProgressDialog(this);
         mLoginEmail = (EditText)findViewById(R.id.loginEmailFeild);
         mLoginPassword = (EditText)findViewById(R.id.loginPasswordFeild);
         mLoginBtn =(Button)findViewById(R.id.loginBtn);
+        createBtn = (Button)findViewById(R.id.createbtn);
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checklogin();
+            }
+        });
+        createBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this,RegisterActivity.class));
             }
         });
     }
@@ -48,6 +60,8 @@ public class LoginActivity extends AppCompatActivity {
         String password = mLoginPassword.getText().toString().trim();
 
         if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)){
+            mProgress.setMessage("Checking Login...");
+            mProgress.show();
             mAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -69,8 +83,12 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 if (dataSnapshot.hasChild(user_id)){
-                    Toast.makeText(LoginActivity.this,"You need to setup your account",Toast.LENGTH_SHORT).show();
+                    Intent main_Intent = new Intent(LoginActivity.this,MainActivity.class);
+                    main_Intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(main_Intent);
 
+                }else {
+                    Toast.makeText(LoginActivity.this,"You need to setup your account",Toast.LENGTH_SHORT).show();
                 }
             }
 
