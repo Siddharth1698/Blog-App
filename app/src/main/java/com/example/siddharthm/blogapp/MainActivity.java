@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,6 +23,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mBlogList;
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabaseUsers;
     private FirebaseAuth.AuthStateListener mAuthListner;
 
 
@@ -51,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Blog");
+        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseReference.keepSynced(true);
         mBlogList = (RecyclerView)findViewById(R.id.blogList);
         mBlogList.setHasFixedSize(true);
         mBlogList.setLayoutManager(new LinearLayoutManager(this));
@@ -61,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        checkUserExist();
         mAuth.addAuthStateListener(mAuthListner);
         FirebaseRecyclerAdapter<PostsData,PostViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<PostsData, PostViewHolder>
                 (PostsData.class,R.layout.activity_post_cards,PostViewHolder.class,mDatabaseReference) {
@@ -73,6 +79,27 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mBlogList.setAdapter(firebaseRecyclerAdapter);
+    }
+
+    private void checkUserExist() {
+        final String user_id = mAuth.getCurrentUser().getUid();
+        mDatabaseUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (!dataSnapshot.hasChild(user_id)){
+                    Intent setup_Intent = new Intent(MainActivity.this,SetupActivity.class);
+                    setup_Intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(setup_Intent);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public static class PostViewHolder extends RecyclerView.ViewHolder{

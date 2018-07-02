@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button mLoginBtn;
     private Button createBtn;
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+    private DatabaseReference mDatabaseUsers;
     private ProgressDialog mProgress;
 
     @Override
@@ -35,7 +35,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
+        mDatabaseUsers.keepSynced(true);
         mProgress = new ProgressDialog(this);
         mLoginEmail = (EditText)findViewById(R.id.loginEmailFeild);
         mLoginPassword = (EditText)findViewById(R.id.loginPasswordFeild);
@@ -66,9 +67,11 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()){
+                        mProgress.dismiss();
                         checkUserExist();
 
                     }else {
+                        mProgress.dismiss();
                         Toast.makeText(LoginActivity.this,"Error Login",Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -78,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkUserExist() {
         final String user_id = mAuth.getCurrentUser().getUid();
-        mDatabase.addValueEventListener(new ValueEventListener() {
+        mDatabaseUsers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -88,7 +91,9 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(main_Intent);
 
                 }else {
-                    Toast.makeText(LoginActivity.this,"You need to setup your account",Toast.LENGTH_SHORT).show();
+                    Intent setup_Intent = new Intent(LoginActivity.this,SetupActivity.class);
+                    setup_Intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(setup_Intent);
                 }
             }
 
