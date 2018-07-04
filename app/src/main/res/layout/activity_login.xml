@@ -46,4 +46,9 @@
         android:layout_marginBottom="27dp"
         android:text="NEED A NEW ACCOUNT" />
 
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/signingooglebtn"
+        android:layout_width="137dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"></com.google.android.gms.common.SignInButton>
 </RelativeLayout>
