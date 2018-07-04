@@ -24,6 +24,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -53,6 +56,14 @@ public class MainActivity extends AppCompatActivity {
                   }
             }
         };
+
+
+        Picasso.Builder builder = new Picasso.Builder(this);
+        builder.downloader(new OkHttpDownloader(this,Integer.MAX_VALUE));
+        Picasso built = builder.build();
+        built.setLoggingEnabled(true);
+        Picasso.setSingletonInstance(built);
+
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Blog");
         mDatabaseUsers = FirebaseDatabase.getInstance().getReference().child("Users");
         mDatabaseReference.keepSynced(true);
@@ -119,9 +130,20 @@ public class MainActivity extends AppCompatActivity {
             TextView post_desc = (TextView)mView.findViewById(R.id.post_desc);
             post_desc.setText(descp);
         }
-        public void setImage(Context ctx, String imagei){
-            ImageView post_image = (ImageView)mView.findViewById(R.id.post_image1);
-            Picasso.with(ctx).load(imagei).into(post_image);
+        public void setImage(final Context ctx, final String imagei){
+            final ImageView post_image = (ImageView)mView.findViewById(R.id.post_image1);
+            Picasso.with(ctx).load(imagei).networkPolicy(NetworkPolicy.OFFLINE).into(post_image, new Callback() {
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onError() {
+                    Picasso.with(ctx).load(imagei).into(post_image);
+
+                }
+            });
 
         }
 
